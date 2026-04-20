@@ -1,11 +1,572 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Speaking Assessment</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Speaking Test App</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --accent: #22c55e;
+      --accent-2: #38bdf8;
+      --danger: #ef4444;
+      --border: #334155;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #020617, #0f172a 30%, #111827 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .app {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+    }
+
+    .card {
+      background: rgba(17, 24, 39, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.65rem;
+      line-height: 1.2;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+      color: #cbd5e1;
+    }
+
+    p { margin: 0 0 8px; }
+    .muted { color: var(--muted); }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .prompt {
+      border: 1px solid #374151;
+      border-radius: 12px;
+      padding: 12px;
+      background: rgba(2, 6, 23, 0.55);
+    }
+
+    .prompt button {
+      margin-top: 8px;
+      width: 100%;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      border: 1px solid #475569;
+      background: #1f2937;
+      color: #f8fafc;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    button:hover:not(:disabled) { transform: translateY(-1px); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .primary { background: #14532d; border-color: #166534; }
+    .secondary { background: #0c4a6e; border-color: #0369a1; }
+    .danger { background: #7f1d1d; border-color: #b91c1c; }
+
+    .timer {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin: 6px 0;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid #475569;
+      font-size: 0.9rem;
+      color: #cbd5e1;
+      background: rgba(2, 6, 23, 0.7);
+    }
+
+    .current-prompt {
+      font-size: 1.1rem;
+      line-height: 1.45;
+      background: rgba(2, 6, 23, 0.55);
+      border: 1px dashed #475569;
+      border-radius: 12px;
+      padding: 12px;
+      min-height: 70px;
+    }
+
+    label {
+      display: block;
+      margin-top: 8px;
+      margin-bottom: 4px;
+      color: #cbd5e1;
+      font-size: 0.95rem;
+    }
+
+    input[type="number"],
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid #4b5563;
+      border-radius: 10px;
+      background: #0b1220;
+      color: var(--text);
+      padding: 10px;
+      font-size: 0.95rem;
+    }
+
+    textarea { min-height: 90px; resize: vertical; }
+
+    .scores {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 8px;
+      filter: invert(0.95) hue-rotate(170deg);
+    }
+
+    .small {
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+
+    .history-item {
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 8px;
+      background: rgba(2, 6, 23, 0.45);
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 14px; }
+      .timer { font-size: 1.8rem; }
+    }
+  </style>
 </head>
 <body>
-<h1>Speaking Assessment App</h1>
-<p>Rename this file to index.html before uploading to GitHub.</p>
+  <main class="app">
+    <section class="card">
+      <h1>English Speaking Test Trainer</h1>
+      <p class="muted">Choose a prompt, prepare, speak, review your recording, and self-score your performance.</p>
+      <div class="row">
+        <span class="status" id="phase">Phase: Idle</span>
+        <span class="status" id="progress">Question 0 / 0</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>1) Prompt Bank</h2>
+      <div class="grid" id="promptBank"></div>
+      <label for="customPrompt">Add your own prompt</label>
+      <textarea id="customPrompt" placeholder="Type a custom speaking prompt..."></textarea>
+      <div class="row" style="margin-top: 8px;">
+        <button id="addPromptBtn">Add Prompt</button>
+        <button id="shuffleBtn" class="secondary">Shuffle Prompts</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2) Test Controls</h2>
+      <div class="grid">
+        <div>
+          <label for="prepTime">Preparation time (seconds)</label>
+          <input type="number" id="prepTime" value="20" min="0" max="300" />
+        </div>
+        <div>
+          <label for="speakTime">Speaking time (seconds)</label>
+          <input type="number" id="speakTime" value="45" min="5" max="600" />
+        </div>
+      </div>
+      <p style="margin-top: 10px;" class="current-prompt" id="currentPrompt">Select a prompt to begin.</p>
+      <div class="timer" id="timer">00:00</div>
+      <div class="row">
+        <button id="startBtn" class="primary" disabled>Start Round</button>
+        <button id="skipBtn" class="secondary" disabled>Skip Prompt</button>
+        <button id="stopBtn" class="danger" disabled>Stop</button>
+      </div>
+      <p class="small" id="micStatus">Microphone: not requested.</p>
+    </section>
+
+    <section class="card">
+      <h2>3) Review + Self-Score</h2>
+      <audio id="playback" controls></audio>
+      <p class="small">Tip: Listen to your recording and score honestly to track improvement.</p>
+      <div class="scores">
+        <div>
+          <label for="fluency">Fluency (1-9)</label>
+          <select id="fluency"></select>
+        </div>
+        <div>
+          <label for="grammar">Grammar (1-9)</label>
+          <select id="grammar"></select>
+        </div>
+        <div>
+          <label for="vocabulary">Vocabulary (1-9)</label>
+          <select id="vocabulary"></select>
+        </div>
+        <div>
+          <label for="pronunciation">Pronunciation (1-9)</label>
+          <select id="pronunciation"></select>
+        </div>
+      </div>
+      <label for="notes">Notes</label>
+      <textarea id="notes" placeholder="What did you do well? What should improve next round?"></textarea>
+      <div class="row" style="margin-top: 10px;">
+        <button id="saveResultBtn">Save Result</button>
+        <button id="exportBtn" class="secondary">Export Session JSON</button>
+        <button id="clearBtn" class="danger">Clear History</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Session History</h2>
+      <div id="history"></div>
+    </section>
+  </main>
+
+  <script>
+    const defaultPrompts = [
+      "Describe a book that changed your perspective.",
+      "Should students have part-time jobs while studying? Why or why not?",
+      "Talk about a memorable trip and what made it meaningful.",
+      "Do you agree that technology improves communication? Explain.",
+      "Describe a skill you want to learn in the next 6 months."
+    ];
+
+    const state = {
+      prompts: [...defaultPrompts],
+      selectedPromptIndex: null,
+      currentRound: 0,
+      chunks: [],
+      mediaRecorder: null,
+      stream: null,
+      phase: "Idle",
+      timerId: null,
+      lastRecordingUrl: "",
+      history: []
+    };
+
+    const el = {
+      promptBank: document.getElementById("promptBank"),
+      customPrompt: document.getElementById("customPrompt"),
+      addPromptBtn: document.getElementById("addPromptBtn"),
+      shuffleBtn: document.getElementById("shuffleBtn"),
+      currentPrompt: document.getElementById("currentPrompt"),
+      prepTime: document.getElementById("prepTime"),
+      speakTime: document.getElementById("speakTime"),
+      startBtn: document.getElementById("startBtn"),
+      skipBtn: document.getElementById("skipBtn"),
+      stopBtn: document.getElementById("stopBtn"),
+      timer: document.getElementById("timer"),
+      phase: document.getElementById("phase"),
+      progress: document.getElementById("progress"),
+      micStatus: document.getElementById("micStatus"),
+      playback: document.getElementById("playback"),
+      saveResultBtn: document.getElementById("saveResultBtn"),
+      exportBtn: document.getElementById("exportBtn"),
+      clearBtn: document.getElementById("clearBtn"),
+      history: document.getElementById("history"),
+      notes: document.getElementById("notes"),
+      fluency: document.getElementById("fluency"),
+      grammar: document.getElementById("grammar"),
+      vocabulary: document.getElementById("vocabulary"),
+      pronunciation: document.getElementById("pronunciation")
+    };
+
+    [el.fluency, el.grammar, el.vocabulary, el.pronunciation].forEach((select) => {
+      for (let i = 1; i <= 9; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = i;
+        select.appendChild(option);
+      }
+      select.value = "6";
+    });
+
+    function formatTime(seconds) {
+      const m = String(Math.floor(seconds / 60)).padStart(2, "0");
+      const s = String(seconds % 60).padStart(2, "0");
+      return `${m}:${s}`;
+    }
+
+    function setPhase(phase) {
+      state.phase = phase;
+      el.phase.textContent = `Phase: ${phase}`;
+    }
+
+    function updateProgress() {
+      const total = state.prompts.length;
+      const current = state.selectedPromptIndex === null ? 0 : state.selectedPromptIndex + 1;
+      el.progress.textContent = `Question ${current} / ${total}`;
+    }
+
+    function renderPromptBank() {
+      el.promptBank.innerHTML = "";
+      state.prompts.forEach((prompt, idx) => {
+        const box = document.createElement("div");
+        box.className = "prompt";
+        const p = document.createElement("p");
+        p.textContent = prompt;
+        const btn = document.createElement("button");
+        btn.textContent = state.selectedPromptIndex === idx ? "Selected" : "Select";
+        btn.className = state.selectedPromptIndex === idx ? "primary" : "";
+        btn.addEventListener("click", () => {
+          state.selectedPromptIndex = idx;
+          el.currentPrompt.textContent = prompt;
+          el.startBtn.disabled = false;
+          el.skipBtn.disabled = false;
+          updateProgress();
+          renderPromptBank();
+        });
+        box.appendChild(p);
+        box.appendChild(btn);
+        el.promptBank.appendChild(box);
+      });
+      updateProgress();
+    }
+
+    function clearTimer() {
+      if (state.timerId) {
+        clearInterval(state.timerId);
+        state.timerId = null;
+      }
+    }
+
+    function runCountdown(seconds, onTick, onDone) {
+      let remain = seconds;
+      onTick(remain);
+      state.timerId = setInterval(() => {
+        remain -= 1;
+        onTick(remain);
+        if (remain <= 0) {
+          clearTimer();
+          onDone();
+        }
+      }, 1000);
+    }
+
+    async function setupMicrophone() {
+      if (state.stream) return true;
+      try {
+        state.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        el.micStatus.textContent = "Microphone: ready.";
+        return true;
+      } catch {
+        el.micStatus.textContent = "Microphone: permission denied or unavailable.";
+        return false;
+      }
+    }
+
+    function startRecording() {
+      if (!state.stream) return;
+      state.chunks = [];
+      state.mediaRecorder = new MediaRecorder(state.stream);
+      state.mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) state.chunks.push(e.data);
+      };
+      state.mediaRecorder.onstop = () => {
+        if (!state.chunks.length) return;
+        const blob = new Blob(state.chunks, { type: "audio/webm" });
+        if (state.lastRecordingUrl) URL.revokeObjectURL(state.lastRecordingUrl);
+        state.lastRecordingUrl = URL.createObjectURL(blob);
+        el.playback.src = state.lastRecordingUrl;
+      };
+      state.mediaRecorder.start();
+    }
+
+    function stopRecording() {
+      if (state.mediaRecorder && state.mediaRecorder.state !== "inactive") {
+        state.mediaRecorder.stop();
+      }
+    }
+
+    function moveToNextPrompt() {
+      if (state.prompts.length === 0) {
+        state.selectedPromptIndex = null;
+        el.currentPrompt.textContent = "No prompts available.";
+        el.startBtn.disabled = true;
+        el.skipBtn.disabled = true;
+        updateProgress();
+        renderPromptBank();
+        return;
+      }
+      const next = (state.selectedPromptIndex === null)
+        ? 0
+        : (state.selectedPromptIndex + 1) % state.prompts.length;
+      state.selectedPromptIndex = next;
+      el.currentPrompt.textContent = state.prompts[next];
+      renderPromptBank();
+    }
+
+    async function startRound() {
+      const prep = Math.max(0, Number(el.prepTime.value) || 0);
+      const speak = Math.max(5, Number(el.speakTime.value) || 45);
+
+      if (state.selectedPromptIndex === null) return;
+      const micOk = await setupMicrophone();
+      if (!micOk) return;
+
+      el.startBtn.disabled = true;
+      el.skipBtn.disabled = true;
+      el.stopBtn.disabled = false;
+
+      setPhase("Preparation");
+      runCountdown(prep, (remain) => {
+        el.timer.textContent = formatTime(Math.max(0, remain));
+      }, () => {
+        setPhase("Speaking");
+        startRecording();
+        runCountdown(speak, (remain) => {
+          el.timer.textContent = formatTime(Math.max(0, remain));
+        }, () => {
+          stopRound(true);
+        });
+      });
+    }
+
+    function stopRound(autoNext = false) {
+      clearTimer();
+      stopRecording();
+      setPhase("Review");
+      el.stopBtn.disabled = true;
+      el.startBtn.disabled = false;
+      el.skipBtn.disabled = false;
+      if (autoNext) {
+        state.currentRound += 1;
+        moveToNextPrompt();
+      }
+    }
+
+    function saveResult() {
+      if (!state.lastRecordingUrl) {
+        alert("Please complete at least one speaking round before saving.");
+        return;
+      }
+      const currentPrompt = state.selectedPromptIndex === null
+        ? "Unknown"
+        : state.prompts[state.selectedPromptIndex];
+      const scores = {
+        fluency: Number(el.fluency.value),
+        grammar: Number(el.grammar.value),
+        vocabulary: Number(el.vocabulary.value),
+        pronunciation: Number(el.pronunciation.value)
+      };
+      const average = ((scores.fluency + scores.grammar + scores.vocabulary + scores.pronunciation) / 4).toFixed(1);
+
+      state.history.unshift({
+        date: new Date().toISOString(),
+        prompt: currentPrompt,
+        scores,
+        average,
+        notes: el.notes.value.trim()
+      });
+      renderHistory();
+    }
+
+    function renderHistory() {
+      el.history.innerHTML = "";
+      if (!state.history.length) {
+        el.history.innerHTML = "<p class='muted'>No saved results yet.</p>";
+        return;
+      }
+      state.history.forEach((item, i) => {
+        const div = document.createElement("div");
+        div.className = "history-item";
+        div.innerHTML = `
+          <strong>#${state.history.length - i}</strong> · ${new Date(item.date).toLocaleString()}<br />
+          <span class="small"><b>Prompt:</b> ${item.prompt}</span><br />
+          <span class="small"><b>Scores:</b> Fluency ${item.scores.fluency}, Grammar ${item.scores.grammar}, Vocabulary ${item.scores.vocabulary}, Pronunciation ${item.scores.pronunciation} · <b>Avg ${item.average}</b></span>
+          <p class="small" style="margin-top: 6px;"><b>Notes:</b> ${item.notes || "(none)"}</p>
+        `;
+        el.history.appendChild(div);
+      });
+    }
+
+    function exportSession() {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        prompts: state.prompts,
+        roundsCompleted: state.currentRound,
+        history: state.history
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "speaking-session.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function shufflePrompts() {
+      for (let i = state.prompts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [state.prompts[i], state.prompts[j]] = [state.prompts[j], state.prompts[i]];
+      }
+      renderPromptBank();
+      if (state.selectedPromptIndex !== null) {
+        el.currentPrompt.textContent = state.prompts[state.selectedPromptIndex] || "Select a prompt to begin.";
+      }
+    }
+
+    el.addPromptBtn.addEventListener("click", () => {
+      const text = el.customPrompt.value.trim();
+      if (!text) return;
+      state.prompts.push(text);
+      el.customPrompt.value = "";
+      renderPromptBank();
+    });
+
+    el.shuffleBtn.addEventListener("click", shufflePrompts);
+    el.startBtn.addEventListener("click", startRound);
+    el.stopBtn.addEventListener("click", () => stopRound(false));
+    el.skipBtn.addEventListener("click", moveToNextPrompt);
+    el.saveResultBtn.addEventListener("click", saveResult);
+    el.exportBtn.addEventListener("click", exportSession);
+    el.clearBtn.addEventListener("click", () => {
+      state.history = [];
+      renderHistory();
+    });
+
+    renderPromptBank();
+    renderHistory();
+  </script>
 </body>
 </html>
