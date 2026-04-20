@@ -1,11 +1,731 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Speaking Assessment</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>iPad Speaking Test</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-2: #10b981;
+      --warn: #ef4444;
+      --border: #d1d5db;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      padding: 14px;
+    }
+
+    h1, h2, h3, p { margin: 0 0 10px; }
+    h1 { font-size: 1.45rem; }
+    h2 { font-size: 1.1rem; }
+
+    .row {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 900px) {
+      .row-2 {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 12px;
+      }
+    }
+
+    label {
+      display: block;
+      margin: 2px 0 6px;
+      font-size: 0.92rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      font-size: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 12px;
+      background: #fff;
+    }
+
+    textarea { min-height: 88px; resize: vertical; }
+
+    button {
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      color: #fff;
+      background: var(--accent);
+      min-height: 48px;
+    }
+
+    button.secondary { background: #475569; }
+    button.success { background: var(--accent-2); }
+    button.warn { background: var(--warn); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn-row.three { grid-template-columns: repeat(3, 1fr); }
+
+    .status {
+      font-weight: 700;
+      color: var(--muted);
+      margin: 8px 0 12px;
+      min-height: 20px;
+    }
+
+    .question-number {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .question {
+      font-size: 1.2rem;
+      font-weight: 700;
+      line-height: 1.35;
+      margin-bottom: 10px;
+      min-height: 54px;
+    }
+
+    .timer-wrap {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      height: 18px;
+      overflow: hidden;
+      background: #e5e7eb;
+      margin: 12px 0;
+    }
+
+    .timer-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #22c55e 0%, #eab308 60%, #ef4444 100%);
+      transition: width 1s linear;
+    }
+
+    .small {
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .student-list {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      max-height: 210px;
+      overflow: auto;
+      margin-top: 8px;
+      padding-right: 2px;
+    }
+
+    .student-btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      min-height: 44px;
+      text-align: left;
+    }
+
+    .student-btn.active {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 2px rgba(37, 99, 235, 0.2);
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .score-btn {
+      background: #e2e8f0;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+      min-height: 44px;
+    }
+
+    .score-btn.active {
+      background: var(--accent-2);
+      color: #fff;
+      border-color: #0f9f74;
+    }
+
+    .recordings {
+      max-height: 260px;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px;
+      background: #f8fafc;
+    }
+
+    .rec-item {
+      border-bottom: 1px dashed var(--border);
+      padding: 8px 0;
+    }
+
+    .rec-item:last-child { border-bottom: none; }
+
+    .rec-meta {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    audio {
+      width: 100%;
+      height: 40px;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+  </style>
 </head>
 <body>
-<h1>Speaking Assessment App</h1>
-<p>Rename this file to index.html before uploading to GitHub.</p>
+  <main class="app">
+    <section class="card">
+      <h1>Speaking Test (iPad Friendly)</h1>
+      <div class="row-2">
+        <div>
+          <label for="studentNames">Student list (one name per line)</label>
+          <textarea id="studentNames" placeholder="Ava\nNoah\nLiam\nEmma"></textarea>
+          <div class="btn-row" style="margin-top:8px;">
+            <button id="loadStudents" class="secondary">Load Students</button>
+            <button id="newSession" class="warn">New Session</button>
+          </div>
+          <div class="student-list" id="studentList"></div>
+        </div>
+
+        <div>
+          <h2 id="activeStudent">No student selected</h2>
+          <p class="small">Each question is timed for 16 seconds. Student answer only.</p>
+          <div class="status" id="status">Press Start Question after selecting a student.</div>
+          <div class="question-number" id="questionNumber">Question 1 of 7</div>
+          <div class="question" id="questionText">Tap Start Question to begin.</div>
+          <div class="timer-wrap" aria-label="countdown timer">
+            <div class="timer-bar" id="timerBar"></div>
+          </div>
+          <div class="small" id="timerLabel">16s remaining</div>
+
+          <div class="btn-row three" style="margin-top:10px;">
+            <button id="startQuestion">Start Question</button>
+            <button id="skipQuestion" class="secondary">Skip</button>
+            <button id="repeatPrompt" class="secondary">Repeat A</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card row-2">
+      <div>
+        <h2>Scoring</h2>
+        <label>Quick score (0-5)</label>
+        <div class="score-grid" id="scoreGrid"></div>
+
+        <label for="notes" style="margin-top:12px;">Teacher notes</label>
+        <textarea id="notes" placeholder="Pronunciation, fluency, vocabulary..."></textarea>
+
+        <div class="btn-row" style="margin-top:10px;">
+          <button id="saveReview" class="success">Save Review</button>
+          <button id="exportCsv" class="secondary">Export CSV</button>
+        </div>
+      </div>
+
+      <div>
+        <h2>Recordings Review</h2>
+        <p class="small">Recordings are saved in browser storage by student + question.</p>
+        <div class="recordings" id="recordingsPanel"></div>
+      </div>
+    </section>
+
+    <div class="footer-note">Tip: first tap may require microphone permission in Safari.</div>
+  </main>
+
+  <script>
+    const QUESTIONS = [
+      "A: Hello! What is your name?",
+      "A: How old are you?",
+      "A: What do you like to do after school?",
+      "A: Tell me about your favorite food.",
+      "A: What did you do last weekend?",
+      "A: Where do you want to travel in the future?",
+      "A: Please describe your best friend."
+    ];
+
+    const MAX_SECONDS = 16;
+    const DB_NAME = "speaking_test_db";
+    const DB_VERSION = 1;
+    const STORE_RECS = "recordings";
+    const STORE_REVIEWS = "reviews";
+
+    const studentNamesEl = document.getElementById("studentNames");
+    const loadStudentsBtn = document.getElementById("loadStudents");
+    const newSessionBtn = document.getElementById("newSession");
+    const studentListEl = document.getElementById("studentList");
+    const activeStudentEl = document.getElementById("activeStudent");
+    const statusEl = document.getElementById("status");
+    const questionTextEl = document.getElementById("questionText");
+    const questionNumberEl = document.getElementById("questionNumber");
+    const timerBarEl = document.getElementById("timerBar");
+    const timerLabelEl = document.getElementById("timerLabel");
+    const startBtn = document.getElementById("startQuestion");
+    const skipBtn = document.getElementById("skipQuestion");
+    const repeatBtn = document.getElementById("repeatPrompt");
+    const scoreGridEl = document.getElementById("scoreGrid");
+    const notesEl = document.getElementById("notes");
+    const saveReviewBtn = document.getElementById("saveReview");
+    const exportCsvBtn = document.getElementById("exportCsv");
+    const recordingsPanelEl = document.getElementById("recordingsPanel");
+
+    let db;
+    let students = [];
+    let currentStudent = null;
+    let currentQuestionIndex = 0;
+    let timerId = null;
+    let secondsLeft = MAX_SECONDS;
+    let stream = null;
+    let mediaRecorder = null;
+    let chunks = [];
+    let isRecording = false;
+    let selectedScore = null;
+
+    function initScoreButtons() {
+      scoreGridEl.innerHTML = "";
+      for (let i = 0; i <= 5; i++) {
+        const btn = document.createElement("button");
+        btn.className = "score-btn";
+        btn.textContent = i;
+        btn.addEventListener("click", () => {
+          selectedScore = i;
+          [...scoreGridEl.children].forEach((x) => x.classList.remove("active"));
+          btn.classList.add("active");
+        });
+        scoreGridEl.appendChild(btn);
+      }
+    }
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = () => {
+          const d = req.result;
+          if (!d.objectStoreNames.contains(STORE_RECS)) {
+            const s = d.createObjectStore(STORE_RECS, { keyPath: "id" });
+            s.createIndex("byStudent", "student", { unique: false });
+          }
+          if (!d.objectStoreNames.contains(STORE_REVIEWS)) {
+            d.createObjectStore(STORE_REVIEWS, { keyPath: "student" });
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function tx(store, mode = "readonly") {
+      return db.transaction(store, mode).objectStore(store);
+    }
+
+    async function init() {
+      db = await openDB();
+      initScoreButtons();
+      resetTimerUI();
+      loadSavedStudents();
+      await loadRecordingsPanel();
+      statusEl.textContent = "Ready. Select student, then tap Start Question.";
+    }
+
+    function loadSavedStudents() {
+      const raw = localStorage.getItem("speaking_students");
+      if (raw) {
+        students = JSON.parse(raw);
+        studentNamesEl.value = students.join("\n");
+        renderStudentButtons();
+      }
+    }
+
+    function saveStudents() {
+      localStorage.setItem("speaking_students", JSON.stringify(students));
+    }
+
+    function renderStudentButtons() {
+      studentListEl.innerHTML = "";
+      students.forEach((name) => {
+        const b = document.createElement("button");
+        b.className = "student-btn" + (name === currentStudent ? " active" : "");
+        b.textContent = name;
+        b.addEventListener("click", async () => {
+          currentStudent = name;
+          currentQuestionIndex = 0;
+          selectedScore = null;
+          notesEl.value = "";
+          [...scoreGridEl.children].forEach((x) => x.classList.remove("active"));
+          activeStudentEl.textContent = `Student: ${name}`;
+          updateQuestionUI();
+          renderStudentButtons();
+          await loadReviewForStudent();
+          await loadRecordingsPanel();
+        });
+        studentListEl.appendChild(b);
+      });
+    }
+
+    function updateQuestionUI() {
+      questionNumberEl.textContent = `Question ${currentQuestionIndex + 1} of ${QUESTIONS.length}`;
+      questionTextEl.textContent = QUESTIONS[currentQuestionIndex] || "All questions finished.";
+    }
+
+    function resetTimerUI() {
+      secondsLeft = MAX_SECONDS;
+      timerBarEl.style.width = "100%";
+      timerLabelEl.textContent = `${secondsLeft}s remaining`;
+    }
+
+    function tickTimer() {
+      secondsLeft -= 1;
+      const pct = (secondsLeft / MAX_SECONDS) * 100;
+      timerBarEl.style.width = `${Math.max(0, pct)}%`;
+      timerLabelEl.textContent = `${Math.max(0, secondsLeft)}s remaining`;
+      if (secondsLeft <= 0) {
+        nextQuestion("Time is up.");
+      }
+    }
+
+    function speakPrompt() {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const text = `Number ${currentQuestionIndex + 1}. ${QUESTIONS[currentQuestionIndex]}`;
+      const ut = new SpeechSynthesisUtterance(text);
+      ut.lang = "en-US";
+      ut.rate = 0.94;
+      window.speechSynthesis.speak(ut);
+    }
+
+    async function ensureAudio() {
+      if (stream) return stream;
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      return stream;
+    }
+
+    async function startRecording() {
+      const s = await ensureAudio();
+      chunks = [];
+      const options = MediaRecorder.isTypeSupported("audio/webm")
+        ? { mimeType: "audio/webm" }
+        : {};
+      mediaRecorder = new MediaRecorder(s, options);
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+      mediaRecorder.start();
+      isRecording = true;
+    }
+
+    function stopRecording() {
+      return new Promise((resolve) => {
+        if (!mediaRecorder || mediaRecorder.state === "inactive") return resolve(null);
+        mediaRecorder.onstop = () => {
+          isRecording = false;
+          const blob = new Blob(chunks, { type: chunks[0]?.type || "audio/webm" });
+          resolve(blob);
+        };
+        mediaRecorder.stop();
+      });
+    }
+
+    function saveRecording(student, qIndex, blob) {
+      const ext = blob.type.includes("ogg") ? "ogg" : blob.type.includes("mp4") ? "m4a" : "webm";
+      const stamp = new Date().toISOString();
+      const fileName = `${student.replace(/\s+/g, "_")}_Q${qIndex + 1}_${stamp.replace(/[.:]/g, "-")}.${ext}`;
+      const data = {
+        id: `${student}__q${qIndex + 1}`,
+        student,
+        question: qIndex + 1,
+        prompt: QUESTIONS[qIndex],
+        blob,
+        fileName,
+        timestamp: stamp
+      };
+      return new Promise((resolve, reject) => {
+        const r = tx(STORE_RECS, "readwrite").put(data);
+        r.onsuccess = () => resolve(data);
+        r.onerror = () => reject(r.error);
+      });
+    }
+
+    function getRecordingsByStudent(student) {
+      return new Promise((resolve, reject) => {
+        const out = [];
+        const index = tx(STORE_RECS).index("byStudent");
+        const req = index.openCursor(IDBKeyRange.only(student));
+        req.onsuccess = () => {
+          const cursor = req.result;
+          if (cursor) {
+            out.push(cursor.value);
+            cursor.continue();
+          } else {
+            out.sort((a, b) => a.question - b.question);
+            resolve(out);
+          }
+        };
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function getAllReviews() {
+      return new Promise((resolve, reject) => {
+        const req = tx(STORE_REVIEWS).getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function saveReview(student, score, notes) {
+      return new Promise((resolve, reject) => {
+        const req = tx(STORE_REVIEWS, "readwrite").put({
+          student,
+          score: score ?? "",
+          notes: notes || "",
+          updatedAt: new Date().toISOString()
+        });
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function loadReviewForStudent() {
+      if (!currentStudent) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        const req = tx(STORE_REVIEWS).get(currentStudent);
+        req.onsuccess = () => {
+          const data = req.result;
+          notesEl.value = data?.notes || "";
+          selectedScore = data?.score === "" || data?.score == null ? null : Number(data.score);
+          [...scoreGridEl.children].forEach((x) => x.classList.remove("active"));
+          if (selectedScore != null && scoreGridEl.children[selectedScore]) {
+            scoreGridEl.children[selectedScore].classList.add("active");
+          }
+          resolve();
+        };
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function loadRecordingsPanel() {
+      recordingsPanelEl.innerHTML = "";
+      if (!currentStudent) {
+        recordingsPanelEl.innerHTML = "<div class='small'>Select a student to view recordings.</div>";
+        return;
+      }
+      const recs = await getRecordingsByStudent(currentStudent);
+      if (!recs.length) {
+        recordingsPanelEl.innerHTML = "<div class='small'>No recordings for this student yet.</div>";
+        return;
+      }
+      recs.forEach((r) => {
+        const wrap = document.createElement("div");
+        wrap.className = "rec-item";
+        const objURL = URL.createObjectURL(r.blob);
+        wrap.innerHTML = `
+          <div class="rec-meta">Q${r.question} • ${new Date(r.timestamp).toLocaleString()}</div>
+          <audio controls src="${objURL}"></audio>
+          <div class="btn-row" style="margin-top:6px;">
+            <button class="secondary" data-download="${r.id}">Download File</button>
+            <button class="secondary" data-replay="${r.question - 1}">Replay A Prompt</button>
+          </div>
+        `;
+        wrap.querySelector("[data-download]").addEventListener("click", () => {
+          const a = document.createElement("a");
+          a.href = objURL;
+          a.download = r.fileName;
+          a.click();
+        });
+        wrap.querySelector("[data-replay]").addEventListener("click", () => {
+          currentQuestionIndex = Number(r.question) - 1;
+          updateQuestionUI();
+          speakPrompt();
+        });
+        recordingsPanelEl.appendChild(wrap);
+      });
+    }
+
+    async function beginQuestion() {
+      if (!currentStudent) {
+        statusEl.textContent = "Please select a student first.";
+        return;
+      }
+      if (currentQuestionIndex >= QUESTIONS.length) {
+        statusEl.textContent = "All 7 questions completed for this student.";
+        return;
+      }
+      try {
+        await startRecording();
+      } catch (e) {
+        statusEl.textContent = "Microphone permission denied or unavailable.";
+        return;
+      }
+      speakPrompt();
+      resetTimerUI();
+      clearInterval(timerId);
+      timerId = setInterval(tickTimer, 1000);
+      statusEl.textContent = `Recording answer for Question ${currentQuestionIndex + 1}...`;
+      startBtn.disabled = true;
+    }
+
+    async function nextQuestion(reason = "Moved to next question.") {
+      clearInterval(timerId);
+      timerId = null;
+      if (isRecording) {
+        const blob = await stopRecording();
+        if (blob && blob.size > 0 && currentStudent) {
+          await saveRecording(currentStudent, currentQuestionIndex, blob);
+        }
+      }
+      statusEl.textContent = reason;
+      currentQuestionIndex += 1;
+      if (currentQuestionIndex >= QUESTIONS.length) {
+        questionTextEl.textContent = "Finished! You can review recordings and score this student.";
+        questionNumberEl.textContent = "Question 7 of 7";
+        timerBarEl.style.width = "0%";
+        timerLabelEl.textContent = "Done";
+      } else {
+        updateQuestionUI();
+        resetTimerUI();
+      }
+      startBtn.disabled = false;
+      await loadRecordingsPanel();
+    }
+
+    function csvEscape(value) {
+      const txt = String(value ?? "").replaceAll('"', '""');
+      return `"${txt}"`;
+    }
+
+    async function exportCsv() {
+      const reviews = await getAllReviews();
+      const rows = [["Student", "Score", "Notes", "RecordingsCount", "UpdatedAt"]];
+
+      for (const student of students) {
+        const review = reviews.find((r) => r.student === student) || {};
+        const recs = await getRecordingsByStudent(student);
+        rows.push([
+          student,
+          review.score ?? "",
+          review.notes ?? "",
+          recs.length,
+          review.updatedAt ?? ""
+        ]);
+      }
+
+      const csv = rows.map((r) => r.map(csvEscape).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `speaking_test_results_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      statusEl.textContent = "CSV exported.";
+    }
+
+    loadStudentsBtn.addEventListener("click", () => {
+      students = studentNamesEl.value
+        .split("\n")
+        .map((x) => x.trim())
+        .filter(Boolean);
+      saveStudents();
+      currentStudent = null;
+      activeStudentEl.textContent = "No student selected";
+      renderStudentButtons();
+      recordingsPanelEl.innerHTML = "<div class='small'>Select a student to view recordings.</div>";
+      statusEl.textContent = `${students.length} students loaded.`;
+    });
+
+    newSessionBtn.addEventListener("click", () => {
+      clearInterval(timerId);
+      timerId = null;
+      currentQuestionIndex = 0;
+      resetTimerUI();
+      updateQuestionUI();
+      statusEl.textContent = "Session reset for current student.";
+      startBtn.disabled = false;
+    });
+
+    startBtn.addEventListener("click", beginQuestion);
+
+    skipBtn.addEventListener("click", async () => {
+      await nextQuestion("Skipped to next question.");
+    });
+
+    repeatBtn.addEventListener("click", () => {
+      if (!currentStudent) {
+        statusEl.textContent = "Select a student first.";
+        return;
+      }
+      speakPrompt();
+      statusEl.textContent = `Replayed Question ${currentQuestionIndex + 1} prompt.`;
+    });
+
+    saveReviewBtn.addEventListener("click", async () => {
+      if (!currentStudent) {
+        statusEl.textContent = "Select a student first.";
+        return;
+      }
+      await saveReview(currentStudent, selectedScore, notesEl.value.trim());
+      statusEl.textContent = "Review saved.";
+    });
+
+    exportCsvBtn.addEventListener("click", exportCsv);
+
+    window.addEventListener("beforeunload", () => {
+      if (stream) stream.getTracks().forEach((t) => t.stop());
+    });
+
+    init().catch((e) => {
+      statusEl.textContent = `Initialization error: ${e.message}`;
+    });
+  </script>
 </body>
 </html>
